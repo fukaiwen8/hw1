@@ -1,6 +1,6 @@
 ---
 title: "Homework 1"
-author: "[Insert your name here]{style='background-color: yellow;'}"
+author: "[Kaiwen Fu]{style='background-color: yellow;'}"
 toc: true
 title-block-banner: true
 title-block-style: default
@@ -106,15 +106,35 @@ For the following questions, provide your answers in a code cell.
 
 1. What data type does the vector contain?
 
+The data type is string
+
 1. Create two new vectors called `my_vec_double` and `my_vec_int` which converts `my_vec` to Double & Integer types, respectively, 
+```{R}
+my_vec_double <- as.numeric(my_vec)
+my_vec_int <- as.integer(my_vec_double)
+print(my_vec_double)
+print(my_vec_int)
+```
 
 1. Create a new vector `my_vec_bool` which comprises of:
     * ```r TRUE```if an element in `my_vec_double` is $\le 0$
     * ```r FALSE``` if an element in `my_vec_double` is $\ge 0$
+```{R}
+my_vec_bool <- my_vec_double > 0
+print(my_vec_bool)
+```
 
     How many elements of `my_vec_double` are greater than zero?
+```{R}
+num_greater_than_zero <- sum(my_vec_bool)
+print(num_greater_than_zero)
+```
 
 1. Sort the values of `my_vec_double` in ascending order. 
+```{R}
+my_vec_sorted <- sort(my_vec_double)
+print(my_vec_sorted)
+```
 
 
 <br><br><br><br>
@@ -147,6 +167,12 @@ $$
 
 Recall the discussion in class on how `R` fills in matrices
 :::
+```{R}
+matrix_3x3 <- matrix(c(1, 2, 3, 4, 5, 6, 7, 8, 9), nrow = 3, byrow = TRUE)
+matrix_1x100 <- matrix((1:100)^2, nrow = 1)
+print(matrix_3x3)
+print(matrix_1x100)
+```
 
 In the next part, we will discover how knowledge of the way in which a matrix is stored in memory can inform better code choices. To this end, the following function takes an input $n$ and creates an $n \times n$ matrix with random entries. 
 
@@ -178,17 +204,17 @@ mean(M)
 
 2. Write a function `row_wise_scan` which scans the entries of `M` one row after another and outputs the number of elements whose value is $\ge 0$. You can use the following **starter code**
 
-```R
+```{R}
 row_wise_scan <- function(x){
     n <- nrow(x)
     m <- ncol(x)
 
     # Insert your code here
     count <- 0
-    for(...){
-        for(...){
-            if(...){
-                count <- count + 1 
+    for(i in 1:n){
+        for(j in 1:m){
+            if(x[i, j] >= 0){
+                count <- count + 1
             }
         }
     }
@@ -198,43 +224,65 @@ row_wise_scan <- function(x){
 ```
 
 
+
 3. Similarly, write a function `col_wise_scan` which does exactly the same thing but scans the entries of `M` one column after another
 
-```R
+```{R}
 col_wise_scan <- function(x){
     count <- 0
-    
-    ... # Insert your code here
+    n <- nrow(x)
+    m <- ncol(x)
+
+    for(j in 1:m){
+        for(i in 1:n){
+            if(x[i, j] >= 0){
+                count <- count + 1
+            }
+        }
+    }
 
     return(count)
 }
+
 ```
+
 You can check if your code is doing what it's supposed to using the function here[^footnote]
 
 4. Between `col_wise_scan` and `row_wise_scan`, which function do you expect to take shorter to run? Why?
 
+I expect col wise scan would be faster than row wise scan because matrix is stored in column.
+
 5. Write a function `time_scan` which takes in a method `f` and a matrix `M` and outputs the amount of time taken to run `f(M)`
 
-```R
+```{R}
 time_scan <- function(f, M){
-    initial_time <- ... # Write your code here
+    initial_time <- Sys.time()
     f(M)
-    final_time <- ...  # Write your code here
-    
+    final_time <- Sys.time()
+
     total_time_taken <- final_time - initial_time
     return(total_time_taken)
 }
+
 ```
+
 
 Provide your output to
 
-```R
-list(
+```{R}
+result <- list(
     row_wise_time = time_scan(row_wise_scan, M),
-    col_wise_time = time_scan(row_wise_scan, M)
+    col_wise_time = time_scan(col_wise_scan, M)
 )
+
+print(result)
+
 ```
+
+
 Which took longer to run? 
+
+Row takes longer to run.
 
 6. Repeat this experiment now when:
     * `M` is a $100 \times 100$ matrix
@@ -242,6 +290,33 @@ Which took longer to run?
     * `M` is a $5000 \times 5000$ matrix
 
 What can you conclude?
+
+```{R}
+#make those matrixs
+M_100 <- matrix(runif(100 * 100), nrow = 100)
+M_1000 <- matrix(runif(1000 * 1000), nrow = 1000)
+M_5000 <- matrix(runif(5000 * 5000), nrow = 5000)
+
+
+time_100_row <- time_scan(row_wise_scan, M_100)
+time_100_col <- time_scan(col_wise_scan, M_100)
+
+time_1000_row <- time_scan(row_wise_scan, M_1000)
+time_1000_col <- time_scan(col_wise_scan, M_1000)
+
+time_5000_row <- time_scan(row_wise_scan, M_5000)
+time_5000_col <- time_scan(col_wise_scan, M_5000)
+
+results <- list(
+    "100x100" = list(row_wise = time_100_row, col_wise = time_100_col),
+    "1000x1000" = list(row_wise = time_1000_row, col_wise = time_1000_col),
+    "5000x5000" = list(row_wise = time_5000_row, col_wise = time_5000_col)
+)
+
+results
+
+```
+I would say as the matrixs gets bigger and bigger the time difference will be more significant. But col wise scan would always be faster than row wise scan.
 
 <br><br><br><br>
 <br><br><br><br>
